@@ -29,7 +29,7 @@ const STATUS_BADGE: Record<UploadStatus, { label: string; bg: string; color: str
   error:     { label: 'Fehler',     bg: 'rgba(239,68,68,0.08)',   color: '#f87171',            border: 'rgba(239,68,68,0.2)'  },
 }
 
-export default function BelegUpload({ userId }: { userId: string }) {
+export default function BelegUpload({ userId, onUploaded }: { userId: string; onUploaded?: () => void }) {
   const [belege, setBelege] = useState<Beleg[]>([])
   const [dragging, setDragging] = useState(false)
   const [cameraActive, setCameraActive] = useState(false)
@@ -146,6 +146,7 @@ export default function BelegUpload({ userId }: { userId: string }) {
     }))
 
     setUploading(false)
+    onUploaded?.()
   }
 
   const pendingCount = belege.filter(b => b.status === 'pending').length

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import BelegUpload from './BelegUpload'
+import BelegBereich from './BelegBereich'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -55,7 +55,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <BelegUpload userId={user.id} />
+        <BelegBereich userId={user.id} />
       </main>
     </div>
   )
