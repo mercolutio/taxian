@@ -134,12 +134,26 @@ export default function BelegUpload({ userId, onUploaded }: { userId: string; on
       // Pfad: {userId}/{uuid}.{ext}  → jeder User sieht nur seine eigenen Dateien via RLS
       const path = `${userId}/${beleg.id}.${ext}`
 
-      const { error } = await supabase.storage
+      const { error: storageError } = await supabase.storage
         .from('belege')
         .upload(path, beleg.file, { contentType: beleg.file.type, upsert: false })
 
-      if (error) {
-        setStatus(beleg.id, 'error', { errorMsg: error.message })
+      if (storageError) {
+        setStatus(beleg.id, 'error', { errorMsg: storageError.message })
+        return
+      }
+
+      const { error: dbError } = await supabase.from('belege').insert({
+        id: beleg.id,
+        user_id: userId,
+        storage_path: path,
+        filename: beleg.file.name,
+        size_bytes: beleg.file.size,
+        mime_type: beleg.file.type,
+      })
+
+      if (dbError) {
+        setStatus(beleg.id, 'error', { errorMsg: dbError.message })
       } else {
         setStatus(beleg.id, 'done', { storagePath: path })
       }

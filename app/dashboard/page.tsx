@@ -1,12 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BelegBereich from './BelegBereich'
+import AdminView from './AdminView'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const isAdmin = profile?.role === 'admin'
 
   async function signOut() {
     'use server'
@@ -32,7 +41,13 @@ export default async function DashboardPage() {
             </div>
             <span className="text-sm font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>Taxian</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {isAdmin && (
+              <span className="text-xs px-2 py-1 rounded-md"
+                style={{ background: 'rgba(139,92,246,0.1)', color: 'var(--neon-purple)', border: '1px solid rgba(139,92,246,0.2)' }}>
+                Admin
+              </span>
+            )}
             <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{user.email}</span>
             <form action={signOut}>
               <button type="submit" className="text-xs px-3 py-1.5 rounded-lg transition-all"
@@ -46,16 +61,31 @@ export default async function DashboardPage() {
 
       {/* Main */}
       <main className="relative z-10 max-w-4xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            Belege
-          </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-            Lade deine Belege hoch oder fotografiere sie direkt.
-          </p>
-        </div>
-
-        <BelegBereich userId={user.id} />
+        {isAdmin ? (
+          <>
+            <div className="mb-8">
+              <h1 className="text-xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                Alle Belege
+              </h1>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+                Übersicht aller hochgeladenen Belege nach Mandant.
+              </p>
+            </div>
+            <AdminView />
+          </>
+        ) : (
+          <>
+            <div className="mb-8">
+              <h1 className="text-xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                Meine Belege
+              </h1>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+                Lade deine Belege hoch oder fotografiere sie direkt.
+              </p>
+            </div>
+            <BelegBereich userId={user.id} />
+          </>
+        )}
       </main>
     </div>
   )
