@@ -55,7 +55,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <BelegUpload />
+        <BelegUpload userId={user.id} />
       </main>
     </div>
   )
