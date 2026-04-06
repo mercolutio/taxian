@@ -20,4 +20,4 @@ jobs:
             git pull origin main
             npm install
             npm run build
-            pm2 restart taxian || pm2 start npm --name "taxian" -- start
+            pm2 restart taxian || pm2 start npm --name "taxian" -- start -- -p 3001
